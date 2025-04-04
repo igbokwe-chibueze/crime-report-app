@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/navbar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,7 +29,7 @@ export default function RootLayout({
             <div className=" absolute inset-0 h-full bg-[radial-gradient(circle_at_center, rgba(14,165,233,0.05), transparent_70%)]"/>
           </div>
           {/* Todo: navbar */}
-
+          <Navbar/>
           <main className="pt-16">
             {children}
           </main>
