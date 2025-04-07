@@ -131,11 +131,12 @@ const Home = () => {
               key={i}
               className="group relative overflow-hidden rounded-2xl bg-zinc-900 p-8 transition-all hover:bg-zinc-800/80"
             >
+              {/* Gradient BHover Effect */}
               <div
                 className="absolute inset-0 bg-gradient-to-b from-sky-500/10 to-transparent opacity-0 transition-opacity 
                 group-hover:opacity-100" 
               />
-              
+
               <div className="relative">
                 <div className="mb-5 inline-flex rounded-xl bg-sky-500/10 p-3">
                   {feature.icon}
