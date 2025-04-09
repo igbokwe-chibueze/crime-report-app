@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ReportForm } from "./reportForm";
-// import ReportForm from "@/components/report/reportForm";
+import { ReportForm } from "@/components/report/reportForm";
+import { ReportSubmitted } from "./reportFormCompleted";
 
 interface ReportData {
     field1?: string;
@@ -25,9 +25,9 @@ const ReportWizard = () => {
   return (
     <div className="rounded-2xl bg-zinc-900 p-8">
       {currentStep === 1 && <ReportForm onComplete={handleStepComplete} />}
-      {/* {currentStep === 2 && (
+      {currentStep === 2 && (
         <ReportSubmitted data={reportData} onComplete={handleStepComplete} />
-      )} */}
+      )}
     </div>
   )
 }
