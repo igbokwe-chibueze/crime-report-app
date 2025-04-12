@@ -1,35 +1,43 @@
-"use client";
+"use client"; // This directive enables React Server Components to run on the client side.
 
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
-import { Report, ReportStatus, ReportType } from "@prisma/client";
-import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react"; // Hook to access user session data.
+import { useEffect, useState } from "react"; // React hooks.
+import { Report, ReportStatus, ReportType } from "@prisma/client"; // Types from the Prisma schema.
+import { signOut } from "next-auth/react"; // Function to handle sign-out.
 
 export default function Dashboard() {
+  // Get session info (user data) using NextAuth
   const { data: session } = useSession();
+
+  // State for fetched reports
   const [reports, setReports] = useState<Report[]>([]);
+  // Filter by report status (e.g. PENDING, RESOLVED, etc.)
   const [filter, setFilter] = useState<ReportStatus | "ALL">("ALL");
+  // Filter by report type (e.g. FIRE, MEDICAL, etc.)
   const [typeFilter, setTypeFilter] = useState<ReportType | "ALL">("ALL");
+  // Loading state to show spinner while fetching data
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch reports when component mounts
   useEffect(() => {
     fetchReports();
   }, []);
 
+  // Function to fetch reports from API
   const fetchReports = async () => {
-    setIsLoading(true);
+    setIsLoading(true); // Start loading spinner
     try {
-      const response = await fetch("/api/reports");
-      const data = await response.json();
-      setReports(data);
+      const response = await fetch("/api/reports"); // Fetch data from API route
+      const data = await response.json(); // Parse JSON
+      setReports(data); // Store data in state
     } catch (error) {
       console.error("Error fetching reports:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Stop loading spinner
     }
   };
-  
 
+  // Function to update a report's status via PATCH request
   const updateReportStatus = async (
     reportId: string,
     newStatus: ReportStatus
@@ -40,9 +48,10 @@ export default function Dashboard() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus }), // Send updated status
       });
 
+      // Refresh report list on success
       if (response.ok) {
         fetchReports();
       }
@@ -51,12 +60,14 @@ export default function Dashboard() {
     }
   };
 
+  // Apply filters to the list of reports
   const filteredReports = reports.filter((report) => {
     const statusMatch = filter === "ALL" || report.status === filter;
     const typeMatch = typeFilter === "ALL" || report.type === typeFilter;
     return statusMatch && typeMatch;
   });
 
+  // Assign a color based on report status for visual labels
   const getStatusColor = (status: ReportStatus) => {
     const colors = {
       PENDING: "bg-amber-500/10 text-amber-500 border border-amber-500/20",
@@ -68,6 +79,7 @@ export default function Dashboard() {
     return colors[status];
   };
 
+  // Show loading spinner while fetching reports
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
@@ -78,6 +90,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Navigation bar */}
       <nav className="border-b border-neutral-800 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
@@ -89,7 +102,7 @@ export default function Dashboard() {
                 {session?.user?.name || "Admin"}
               </span>
               <button
-                onClick={() => signOut()}
+                onClick={() => signOut()} // Sign the user out
                 className="px-4 py-2 text-sm font-medium text-neutral-300 bg-neutral-900 rounded-lg hover:bg-neutral-800 border border-neutral-800 transition-all hover:border-neutral-700"
               >
                 Sign out
@@ -99,9 +112,12 @@ export default function Dashboard() {
         </div>
       </nav>
 
+      {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Filter controls */}
         <div className="mb-8 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4">
+            {/* Filter by report status */}
             <select
               value={filter}
               onChange={(e) =>
@@ -117,6 +133,7 @@ export default function Dashboard() {
               ))}
             </select>
 
+            {/* Filter by report type */}
             <select
               value={typeFilter}
               onChange={(e) =>
@@ -133,11 +150,13 @@ export default function Dashboard() {
             </select>
           </div>
 
+          {/* Display total number of matching reports */}
           <div className="text-neutral-400">
             {filteredReports.length} Reports
           </div>
         </div>
 
+        {/* Report cards */}
         <div className="grid gap-4">
           {filteredReports.map((report) => (
             <div
@@ -146,6 +165,7 @@ export default function Dashboard() {
             >
               <div className="flex justify-between items-start gap-6">
                 <div className="space-y-4 flex-1">
+                  {/* Report title and status badge */}
                   <div className="flex items-center gap-3">
                     <h2 className="text-lg font-medium text-neutral-200">
                       {report.title}
@@ -158,9 +178,13 @@ export default function Dashboard() {
                       {report.status}
                     </span>
                   </div>
+
+                  {/* Report description */}
                   <p className="text-neutral-400 text-sm">
                     {report.description}
                   </p>
+
+                  {/* Metadata: type, location, date */}
                   <div className="flex flex-wrap gap-6 text-sm text-neutral-500">
                     <span className="flex items-center gap-2">
                       <div className="w-4 h-4 rounded-full bg-neutral-800 flex items-center justify-center">
@@ -181,6 +205,8 @@ export default function Dashboard() {
                       {new Date(report.createdAt).toLocaleDateString()}
                     </span>
                   </div>
+
+                  {/* Optional image if attached to the report */}
                   {report.image && (
                     <img
                       src={report.image}
@@ -189,6 +215,8 @@ export default function Dashboard() {
                     />
                   )}
                 </div>
+
+                {/* Status update dropdown */}
                 <select
                   value={report.status}
                   onChange={(e) =>
@@ -209,6 +237,7 @@ export default function Dashboard() {
             </div>
           ))}
 
+          {/* Fallback when no matching reports are found */}
           {filteredReports.length === 0 && (
             <div className="text-center py-12 text-neutral-500 bg-neutral-900/50 rounded-xl border border-neutral-800">
               No reports found matching the selected filters.
