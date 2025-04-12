@@ -1,9 +1,10 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 
-export default NextAuth({
+// Using the 'satisfies' operator to ensure our config meets NextAuthConfig without freezing literals
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -16,14 +17,10 @@ export default NextAuth({
           throw new Error("Please enter an email and password");
         }
 
-        // Explicitly cast to string
         const email = credentials.email as string;
         const password = credentials.password as string;
 
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
-
+        const user = await prisma.user.findUnique({ where: { email } });
         if (!user) {
           throw new Error("No user found with this email");
         }
@@ -37,7 +34,7 @@ export default NextAuth({
           id: user.id.toString(),
           email: user.email,
           name: user.name,
-          role: user.role, // Now recognized via the type augmentation
+          role: user.role,
         };
       },
     }),
@@ -60,6 +57,8 @@ export default NextAuth({
     signIn: "/auth/signin",
   },
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as const,
   },
-});
+} satisfies NextAuthConfig;
+
+export default NextAuth(authOptions);
