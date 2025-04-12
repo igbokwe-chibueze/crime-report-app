@@ -28,6 +28,7 @@ export default function Dashboard() {
       setIsLoading(false);
     }
   };
+  
 
   const updateReportStatus = async (
     reportId: string,
@@ -218,15 +219,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-
-
-// import React from 'react'
-
-// const page = () => {
-//   return (
-//     <div className=' text-center text-white font-bold text-2xl'>Dashboard Page</div>
-//   )
-// }
-
-// export default page
